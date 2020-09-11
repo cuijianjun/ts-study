@@ -1,29 +1,32 @@
-import superagent from "superagent";
-import cheerio from 'cheerio';
-class Crawler {
-    private secret = '';
-    private url =  `
-    http://www.dell-lee.com/typescript/demo.html?secret=${this.secret}
-    `
-    private rawHtml = ''
-    getCourseInfo(html: string) {
-        const $ = cheerio.load(html);
-        const courseItems = $('.course-item');
-        courseItems.map((index, element) => {
-            const descs = $(element).find('.course-desc');
-            const title = descs.eq(0).text();
-            const count = parseInt(descs.eq(1).text().split(": ")[1], 10);``
-        })
-    }
-    async getRawHtml () { 
-        const result = await superagent.get(this.url);
-        this.rawHtml = result.text;
-        this.getCourseInfo(result.text)
-    }
-    constructor() {
-        console.log('constructor');
-        this.getRawHtml();
-    }
+import fs from 'fs';
+import path from 'path';
+import superagent from 'superagent';
+
+export interface Analyzer {
+  analyze: (html: string, filePath: string) => string;
 }
 
-const crawler = new Crawler()
+class Crowller {
+  private filePath = path.resolve(__dirname, '../data/course.json');
+
+  private async getRawHtml() {
+    const result = await superagent.get(this.url);
+    return result.text;
+  }
+
+  private writeFile(content: string) {
+    fs.writeFileSync(this.filePath, content);
+  }
+
+  private async initSpiderProcess() {
+    const html = await this.getRawHtml();
+    const fileContent = this.analyzer.analyze(html, this.filePath);
+    this.writeFile(fileContent);
+  }
+
+  constructor(private url: string, private analyzer: Analyzer) {
+    this.initSpiderProcess();
+  }
+}
+
+export default Crowller;
