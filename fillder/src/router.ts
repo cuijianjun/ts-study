@@ -5,6 +5,7 @@ import DellAnalyzer from './dellAnalyzer';
 interface RequestWithBody extends Request {
   body: {
     [key: string]: string | undefined;
+  };
 }
 
 const router = Router();
@@ -21,18 +22,26 @@ router.get('/', (req: Request, res: Response) => {
     </html>
   `);
 });
+const crowller = async (url: string) => {
+  // const url = `http://www.wwqun.com/m/Product.asp?id=23&page=3`;
+  const analyzer = DellAnalyzer.getInstance();
+  new Crowller(url, analyzer);
+}
 
-router.post('/getData', (req: RequestWithBody, res: Response) => {
-  const {password} = req.body;
-  if (password === '123') {
-    const secret = 'secretKey';
-    const url = `http://www.dell-lee.com/typescript/demo.html?secret=${secret}`;
-    const analyzer = DellAnalyzer.getInstance();
-    new Crowller(url, analyzer);
-    res.send('getData Success!');
-  } else {
-    res.send('password Error!');
+const genUrl = (base: string) => {
+  const url = []
+  for(let i = 1; i< 100; i++) {
+    url.push(`${base}${i}`)
   }
+  return url
+}
+router.get('/getData', (req: RequestWithBody, res: Response) => {
+  const temp = genUrl('http://www.wwqun.com/m/Product.asp?id=23&page=')
+  console.log(temp)
+  temp.map(async (index, item) => {
+    await crowller(item + '')
+  })
+  res.send('getData Success!');
 });
 
 export default router;

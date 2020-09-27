@@ -16,17 +16,15 @@ var DellAnalyzer = /** @class */ (function () {
     };
     DellAnalyzer.prototype.getCourseInfo = function (html) {
         var $ = cheerio_1.default.load(html);
-        var courseItems = $('.course-item');
+        var courseItems = $('.goodslist>.item');
         var courseInfos = [];
         courseItems.map(function (index, element) {
-            var descs = $(element).find('.course-desc');
-            var title = descs.eq(0).text();
-            var count = parseInt(descs
-                .eq(1)
-                .text()
-                .split('：')[1], 10);
-            courseInfos.push({ title: title, count: count });
+            var descs = $(element).find('a>img');
+            var title = $(element).find('p>a').text();
+            var url = descs.attr('src');
+            courseInfos.push({ title: title, url: url });
         });
+        console.log(courseInfos);
         return {
             time: new Date().getTime(),
             data: courseInfos
@@ -34,6 +32,7 @@ var DellAnalyzer = /** @class */ (function () {
     };
     DellAnalyzer.prototype.generateJsonContent = function (courseInfo, filePath) {
         var fileContent = {};
+        console.log(courseInfo);
         if (fs_1.default.existsSync(filePath)) {
             fileContent = JSON.parse(fs_1.default.readFileSync(filePath, 'utf-8'));
         }
